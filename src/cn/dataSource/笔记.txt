@@ -1,0 +1,65 @@
+DataSource
+    概念:一个容器（集合），存放数据库连接的容器
+
+
+    实现:
+        标准接口:DataSource javax.sql包下的
+            1.方法
+                *获取连接:getConnection()
+                *归还连接:Connection.close();如果连接对象Connection是从连接池中获取的，
+                         那么调用connection.close()方法不会再关闭资源，而是归还资源给连接池
+
+            2.由数据库厂商实现
+                1.c3p0:数据库连接池技术
+                2.Druid:数据库连接池实现技术
+    c3p0:数据库连接池技术
+        *步骤:
+            1.导入jar包（两个）c3p0-0.9.2.1.jar 和 mchange-commons-java-0.2.3.4.jar
+            2.定义配置文件:
+                *名称:c3p0.properties 或 c3p0-config.xml
+                *路径:直接将文件放在src目录下即可
+
+            3.创建核心对象 数据库连接池对象 ComboPooledDataSource
+            4.获取连接:getConnection
+
+    Druid:数据库连接池实现技术，由阿里爸爸提供
+        1.步骤:
+            1.导入jar包 druid-1.0.9.jar
+            2.定义配置文件:
+                *是properties形式的
+                *可以叫任意名称，可以放在任意目录下
+            3.加载配置文件properties
+            4.获取数据库连接池对象:通过工厂类获取 DruidDataSourceFactory
+            5.获取连接:getConnection
+
+        2.定义工具类
+            1.定义一个类 JDBCUtils
+            2.提供静态代码块加载配置文件，初始化连接池对象
+            3.提供方法
+                1.获取连接方法:通过数据库连接池获取连接
+                2.释放资源
+                3.获取连接池的方法
+
+给数据库表的id属性添加自动增长
+ALTER TABLE `db3`.`account`
+CHANGE COLUMN `id` `id` INT(11) NOT NULL AUTO_INCREMENT ;
+
+Spring JDBC
+    JDBCTemplate对象简化JDBC开发
+    步骤:
+        1.导入jar包
+        2.创建JDBCTemplate对象，依赖雨数据源DataSource
+            *JDBCTemplate template = new JDBCTemplate(ds);
+        3.调用JDBCTemplate的方法完成CRUD操作
+            *update():执行DML语句
+            *queryForMap:将查询结果集封装成Map集合,将列名作为key，将值作为value，将这条记录封装为一个map集合
+                *注意:这个方法查询的结果集长度为1
+            *queryForList():将查询结果集封装成list集合
+                *注意:将每一条极了封装为一个Map集合，再见Map集合装载到List集合中
+            *query():查询结果，将结果封装为JavaBean对象
+                query的参数:RowMapper
+                    *一般我们使用BeanPropertyRowMapper实现类，可以完成数据到JavaBean的自动封装
+                    *new BeanPropertyRowMapper<类型>(类型.class)
+                        new BeanPropertyRowMapper<Account>(Account.class)
+            *queryForObject:查询结果，将结果封装为对象
+                *一般用于聚合函数的查询
